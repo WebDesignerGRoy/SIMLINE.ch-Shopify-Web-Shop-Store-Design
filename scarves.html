@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scarves — SIM-LINE</title>
+  <meta name="description" content="Browse the SIM-LINE scarf collection. Each piece handmade in Switzerland, available in only 1 to 3 examples." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main>
+    <div class="container page-header">
+      <p class="eyebrow">The collection</p>
+      <h1>Scarves</h1>
+      <p>One-of-a-kind pieces, handmade in Switzerland. Each fabric is used for only 1 to 3 scarves.</p>
+    </div>
+
+    <div class="container">
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-chip active" data-filter="all">All</button>
+        <button class="filter-chip" data-filter="cotton">Cotton</button>
+        <button class="filter-chip" data-filter="silk">Silk</button>
+        <button class="filter-chip" data-filter="viscose">Viscose</button>
+        <button class="filter-chip" data-filter="wool">Wool</button>
+      </div>
+      <div id="grid" class="product-grid">
+        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+      </div>
+    </div>
+
+    <section style="padding-top:5rem"></section>
+  </main>
+
+  <script src="js/shopify.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    mountChrome('scarves');
+    let allProducts = [];
+
+    function render(filter) {
+      const grid = document.getElementById('grid');
+      const filtered = filter === 'all'
+        ? allProducts
+        : allProducts.filter(e => {
+            const txt = (e.node.title + ' ' + e.node.description + ' ' + e.node.options.map(o => o.values.join(' ')).join(' ')).toLowerCase();
+            return txt.includes(filter);
+          });
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><h3>No products found</h3><p>Try another filter or come back soon.</p></div>`;
+        return;
+      }
+      grid.innerHTML = filtered.map(productCardHtml).join('');
+    }
+
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        render(chip.getAttribute('data-filter'));
+      });
+    });
+
+    fetchProducts(50).then(p => { allProducts = p || []; render('all'); });
+  </script>
+</body>
+</html>
